@@ -7,20 +7,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var getKeyFlag string
+
+func init() {
+	getCmd.Flags().StringVar(&getKeyFlag, "key", "", "Key to retrieve")
+	getCmd.MarkFlagRequired("key")
+	RootCmd.AddCommand(getCmd)
+}
+
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get the secret associated with the key",
 	Run: func(cmd *cobra.Command, args []string) {
 		v := vault.File(encodingKey, secretsPath())
-		key := args[0]
-		value, err := v.Get(key)
+		value, err := v.Get(getKeyFlag)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%s=%s\n", key, value)
+		fmt.Printf("%s=%s\n", getKeyFlag, value)
 	},
-}
-
-func init() {
-	RootCmd.AddCommand(getCmd)
 }

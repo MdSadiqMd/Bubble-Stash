@@ -36,11 +36,23 @@ func (v *Vault) writeKeyValues(w io.Writer) error {
 
 func (v *Vault) load() error {
 	f, err := os.Open(v.filePath)
-	if err != nil {
+	if os.IsNotExist(err) {
 		v.keyValues = make(map[string]string)
+		return nil
+	}
+	if err != nil {
 		return err
 	}
 	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if fi.Size() == 0 {
+		v.keyValues = make(map[string]string)
+		return nil
+	}
 
 	r, err := encrypt.DecryptReader(v.encodingKey, f)
 	if err != nil {
